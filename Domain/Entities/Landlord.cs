@@ -8,15 +8,24 @@ namespace Domain.Entities
     {
         private Guid _id;
 
+        public Landlord(IEnumerable<IEvent> history)
+        {
+            LoadFromHistory(history);
+        }
+
         public Landlord(Guid id, string name)
         {
-            var handlers = new Dictionary<Type, Action<IEvent>>
-                           {
-                               { typeof(LandlordCreated), x => Apply((LandlordCreated)x) },
-                           };
-            Register(handlers);
-
             ApplyChange(new LandlordCreated(id, name));
+        }
+
+        protected override void Apply(IEvent e)
+        {
+            switch (e)
+            {
+                case LandlordCreated x:
+                    Apply(x);
+                    break;
+            }
         }
 
         private void Apply(LandlordCreated e)
