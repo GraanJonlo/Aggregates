@@ -20,12 +20,16 @@ namespace DapperDb
 
         public void SaveEvents(Guid aggregateId, IEnumerable<Event> events, int expectedVersion)
         {
-            var lastEvent = _transaction.Connection.QueryFirstOrDefault<DbEvent>(
+            var pastEvents = _transaction.Connection.Query<DbEvent>(
                 @"SELECT id,uuid,version,eventdata
                 FROM Events
-                ORDER BY id DESC",transaction: _transaction);
+                WHERE uuid=@Uuid
+                ORDER BY id DESC",
+                param: new { Uuid = aggregateId },
+                transaction: _transaction)
+                .ToList();
 
-            if (lastEvent != null && lastEvent.Version != expectedVersion && expectedVersion != -1)
+            if (pastEvents.Any() && pastEvents.Last().Version != expectedVersion && expectedVersion != -1)
             {
                 throw new ConcurrencyException();
             }
@@ -56,7 +60,7 @@ namespace DapperDb
             return _transaction.Connection.Query<DbEvent>(
                     @"SELECT id,uuid,version,eventdata
                     FROM Events
-                    WHERE uuid=@UUID",
+                    WHERE uuid=@Uuid",
                     param: new {Uuid = aggregateId},
                     transaction: _transaction)
                 .Select(x => JsonConvert.DeserializeObject<Event>(x.EventData,
