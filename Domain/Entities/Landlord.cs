@@ -8,9 +8,11 @@ namespace Domain.Entities
     {
         private Guid _id;
 
-        public Landlord(IEnumerable<IEvent> history)
+        public override Guid Id => _id;
+
+        public Landlord()
         {
-            LoadFromHistory(history);
+            
         }
 
         public Landlord(Guid id, string name)
@@ -18,7 +20,7 @@ namespace Domain.Entities
             ApplyChange(new LandlordCreated(id, name));
         }
 
-        protected override void Apply(IEvent e)
+        protected override void Apply(Event e)
         {
             switch (e)
             {

@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Domain.Events;
 
 namespace Domain
 {
     public abstract class Aggregate
     {
-        private readonly List<IEvent> _changes = new List<IEvent>();
+        private readonly List<Event> _changes = new List<Event>();
+        public abstract Guid Id { get; }
 
-        public IEnumerable<IEvent> GetUncommittedChanges()
+        public IEnumerable<Event> GetUncommittedChanges()
         {
             return _changes;
         }
@@ -17,7 +19,7 @@ namespace Domain
             _changes.Clear();
         }
 
-        public void LoadFromHistory(IEnumerable<IEvent> history)
+        public void LoadFromHistory(IEnumerable<Event> history)
         {
             foreach (var e in history)
             {
@@ -25,14 +27,14 @@ namespace Domain
             }
         }
 
-        protected abstract void Apply(IEvent e);
+        protected abstract void Apply(Event e);
 
-        protected void ApplyChange<T2>(T2 e) where T2:IEvent
+        protected void ApplyChange<T>(T e) where T:Event
         {
             ApplyChange(e, true);
         }
 
-        private void ApplyChange<T2>(T2 e, bool isNew) where T2:IEvent
+        private void ApplyChange<T>(T e, bool isNew) where T:Event
         {
             Apply(e);
 

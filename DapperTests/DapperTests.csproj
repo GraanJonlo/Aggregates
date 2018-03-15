@@ -14,8 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain\Domain.csproj" />
-    <ProjectReference Include="..\InMemoryFakes\InMemoryFakes.csproj" />
+    <ProjectReference Include="..\DapperDb\DapperDb.csproj" />
   </ItemGroup>
 
 </Project>

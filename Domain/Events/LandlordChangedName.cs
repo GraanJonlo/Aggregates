@@ -2,7 +2,7 @@
 
 namespace Domain.Events
 {
-    public readonly struct LandlordChangedName : IEvent
+    public class LandlordChangedName : Event
     {
         public readonly Guid Id;
         public readonly string Name;
