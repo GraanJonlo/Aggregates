@@ -20,16 +20,15 @@ namespace DapperDb
 
         public void SaveEvents(Guid aggregateId, IEnumerable<Event> events, int expectedVersion)
         {
-            var pastEvents = _transaction.Connection.Query<DbEvent>(
-                @"SELECT id,uuid,version,eventdata
-                FROM Events
-                WHERE uuid=@Uuid
-                ORDER BY id DESC",
-                param: new { Uuid = aggregateId },
-                transaction: _transaction)
-                .ToList();
+            var updatedVersionRecord = _transaction.Connection.QueryFirst<DbVersion>(
+                @"IF NOT EXISTS (SELECT id FROM Versions WHERE uuid=@Uuid)
+	                INSERT INTO Versions (uuid, version) VALUES (@Uuid, 0)
+                UPDATE Versions SET version = version + 1 WHERE uuid=@Uuid
+                SELECT id, uuid, version FROM Versions WHERE uuid=@Uuid",
+                param: new {Uuid = aggregateId},
+                transaction: _transaction);
 
-            if (pastEvents.Any() && pastEvents.Last().Version != expectedVersion && expectedVersion != -1)
+            if (updatedVersionRecord.Version != expectedVersion + 1)
             {
                 throw new ConcurrencyException();
             }

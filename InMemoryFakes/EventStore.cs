@@ -18,7 +18,7 @@ namespace InMemoryFakes
                 eventRecords = new List<EventRecord>();
                 _fake.Add(aggregateId, eventRecords);
             }
-            else if (eventRecords[eventRecords.Count - 1].Version != expectedVersion && expectedVersion != -1)
+            else if (eventRecords[eventRecords.Count - 1].Version != expectedVersion)
             {
                 throw new ConcurrencyException();
             }
