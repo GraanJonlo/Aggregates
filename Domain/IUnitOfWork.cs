@@ -1,8 +1,7 @@
 ﻿using System;
-using Domain;
 using Domain.Entities;
 
-namespace DapperDb
+namespace Domain
 {
     public interface IUnitOfWork : IDisposable
     {

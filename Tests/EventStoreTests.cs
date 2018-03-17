@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Domain;
 using Domain.Events;
+using Domain.Values;
 using InMemoryFakes;
 using Xunit;
 
@@ -12,19 +13,16 @@ namespace Tests
         [Fact]
         public void Foo()
         {
+            var address = new Address("Faux House", "Imaginary Street", "Scum on the Wold", "Widgetshire", "AB12 3CD");
+
             var events = new List<Event>
                          {
-                             {
-                                 new LandlordCreated(
-                                     new Guid("00000000-0000-0000-0000-000000000001"), "Bob")
-                             },
-                             {
-                                 new LandlordChangedName(
-                                     new Guid("00000000-0000-0000-0000-000000000001"), "Harry")
-                             }
+                             new LandlordCreated(new Guid("00000000-0000-0000-0000-000000000001"),new Name("Bob", "Rocket"),"bob.rocket@email.com", address),
+                             new LandlordChangedName(new Guid("00000000-0000-0000-0000-000000000001"),new Name("Peter", "Crabkin"))
                          };
             IEventStore store = new EventStore();
-            store.SaveEvents(new Guid("00000000-0000-0000-0000-000000000001"), events, 0);
+            store.SaveEvents(new Guid("00000000-0000-0000-0000-000000000001"),
+                events, 0);
 
             var events2 = store.GetEventsForAggregate(new Guid("00000000-0000-0000-0000-000000000001"));
 

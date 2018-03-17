@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Domain.Entities;
 using Domain.Events;
+using Domain.Values;
 using Xunit;
 
 namespace Tests
@@ -12,22 +13,25 @@ namespace Tests
         [Fact]
         public void WhenChangingLandlordName()
         {
+            var address = new Address("Faux House", "Imaginary Street", "Scum on the Wold", "Widgetshire", "AB12 3CD");
+
             var events = new List<Event>
                          {
-                             new LandlordCreated(
-                                 new Guid("00000000-0000-0000-0000-000000000000"), "Bob")
+                             new LandlordCreated(new Guid("00000000-0000-0000-0000-000000000000"),new Name("Bob", "Rocket"), "bob.rocket@email.com", address)
                          };
             var sut = new Landlord();
             sut.LoadFromHistory(events);
 
-            sut.ChangeName("Harry");
+            sut.ChangeName(new Name("Peter", "Crabkin"));
 
-            Assert.Equal(1, sut.GetUncommittedChanges().Count());
+            Assert.Single(sut.GetUncommittedChanges());
 
-            var result = (LandlordChangedName)sut.GetUncommittedChanges().First();
+            var result =
+                (LandlordChangedName) sut.GetUncommittedChanges().First();
 
-            Assert.Equal(new Guid("00000000-0000-0000-0000-000000000000"), result.Id);
-            Assert.Equal("Harry", result.Name);
+            Assert.Equal(new Guid("00000000-0000-0000-0000-000000000000"),
+                result.Id);
+            Assert.Equal(new Name("Peter", "Crabkin"), result.Name);
         }
     }
 }

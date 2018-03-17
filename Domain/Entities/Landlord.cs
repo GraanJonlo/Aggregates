@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Domain.Events;
+using Domain.Values;
 
 namespace Domain.Entities
 {
@@ -15,9 +15,15 @@ namespace Domain.Entities
             
         }
 
-        public Landlord(Guid id, string name)
+        private Landlord(Guid id, Name name, string email, Address address)
         {
-            ApplyChange(new LandlordCreated(id, name));
+            ApplyChange(new LandlordCreated(id, name, email, address));
+        }
+
+        public static Landlord Create(Guid id, Name name, string email, Address address)
+        {
+            // TODO Validate
+            return new Landlord(id, name, email, address);
         }
 
         protected override void Apply(Event e)
@@ -35,7 +41,7 @@ namespace Domain.Entities
             _id = e.Id;
         }
 
-        public void ChangeName(string name)
+        public void ChangeName(Name name)
         {
             ApplyChange(new LandlordChangedName(_id, name));
         }
