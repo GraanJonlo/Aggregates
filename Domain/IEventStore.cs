@@ -7,7 +7,8 @@ namespace Domain
     public interface IEventStore
     {
         void SaveEvents(string streamId, Guid aggregateId, IEnumerable<Event> events, int expectedVersion);
-        List<Event> GetEventsForAggregate(string streamId, Guid aggregateId);
+        IEnumerable<Event> GetEvents(string streamId, Guid aggregateId);
+        IEnumerable<Event> GetEvents(string streamId, int skip, int take);
     }
 
     public class AggregateNotFoundException : Exception

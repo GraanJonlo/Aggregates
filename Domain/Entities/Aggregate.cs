@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Domain.Events;
 
-namespace Domain
+namespace Domain.Entities
 {
     public abstract class Aggregate
     {

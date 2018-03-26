@@ -25,7 +25,7 @@ namespace Domain.Entities
             return new Landlord(id, name, email, address);
         }
 
-        public static Landlord Create(List<Event> e)
+        public static Landlord Create(IEnumerable<Event> e)
         {
             var instance = new Landlord();
             instance.LoadFromHistory(e);

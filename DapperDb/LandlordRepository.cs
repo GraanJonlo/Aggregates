@@ -20,7 +20,7 @@ namespace DapperDb
 
         public Landlord GetById(Guid id)
         {
-            var e = _storage.GetEventsForAggregate("landlord", id);
+            var e = _storage.GetEvents("landlord", id);
             return Landlord.Create(e);
         }
     }

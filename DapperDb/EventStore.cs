@@ -59,17 +59,31 @@ namespace DapperDb
             }
         }
 
-        public List<Event> GetEventsForAggregate(string streamId, Guid aggregateId)
+        public IEnumerable<Event> GetEvents(string streamId, Guid aggregateId)
         {
             return _transaction.Connection.Query<DbEvent>(
                     @"SELECT id,uuid,version,eventdata
                     FROM Events
-                    WHERE streamid=@StreamId AND uuid=@Uuid",
+                    WHERE streamid=@StreamId AND uuid=@Uuid
+                    ORDER BY id ASC",
                     param: new {StreamId = streamId, Uuid = aggregateId},
                     transaction: _transaction)
                 .Select(x => JsonConvert.DeserializeObject<Event>(x.EventData,
-                    new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Objects}))
-                .ToList();
+                    new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Objects}));
+        }
+
+        public IEnumerable<Event> GetEvents(string streamId, int skip, int take)
+        {
+            return _transaction.Connection.Query<DbEvent>(
+                    @"SELECT id,uuid,version,eventdata
+                    FROM Events
+                    WHERE streamid=@StreamId
+                    ORDER BY id ASC
+                    OFFSET (@Skip) ROWS FETCH NEXT (@Take) ROWS ONLY",
+                    param: new {StreamId = streamId, Skip = skip, Take = take},
+                    transaction: _transaction)
+                .Select(x => JsonConvert.DeserializeObject<Event>(x.EventData,
+                    new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Objects}));
         }
     }
 }
