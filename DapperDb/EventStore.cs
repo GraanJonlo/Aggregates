@@ -18,14 +18,14 @@ namespace DapperDb
             _transaction = transaction;
         }
 
-        public void SaveEvents(Guid aggregateId, IEnumerable<Event> events, int expectedVersion)
+        public void SaveEvents(string streamId, Guid aggregateId, IEnumerable<Event> events, int expectedVersion)
         {
             var updatedVersionRecord = _transaction.Connection.QueryFirst<DbVersion>(
-                @"IF NOT EXISTS (SELECT id FROM Versions WHERE uuid=@Uuid)
-	                INSERT INTO Versions (uuid, version) VALUES (@Uuid, 0)
+                @"IF NOT EXISTS (SELECT id FROM Versions WHERE streamid=@StreamId AND uuid=@Uuid)
+	                INSERT INTO Versions (streamid, uuid, version) VALUES (@StreamId, @Uuid, 0)
                 UPDATE Versions SET version = version + 1 WHERE uuid=@Uuid
-                SELECT id, uuid, version FROM Versions WHERE uuid=@Uuid",
-                param: new {Uuid = aggregateId},
+                SELECT id, streamid, uuid, version FROM Versions WHERE streamid=@StreamId AND uuid=@Uuid",
+                param: new {StreamId = streamId, Uuid = aggregateId},
                 transaction: _transaction);
 
             if (updatedVersionRecord.Version != expectedVersion + 1)
@@ -42,28 +42,33 @@ namespace DapperDb
 
                 _transaction.Connection.Execute(
                     @"INSERT INTO Events
-                        (uuid, version, eventdata)
+                        (streamid, uuid, version, eventdata)
                     VALUES
-                        (@Uuid, @Version, @EventData)",
-                    param: new {Uuid = aggregateId, Version = i, EventData = JsonConvert.SerializeObject(@event,
-                                   new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects })
-                               },
+                        (@StreamId, @Uuid, @Version, @EventData)",
+                    param: new
+                    {
+                        StreamId = streamId,
+                        Uuid = aggregateId,
+                        Version = i,
+                        EventData = JsonConvert.SerializeObject(@event,
+                            new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Objects})
+                    },
                     transaction: _transaction);
 
                 //_publisher.Publish(@event);
             }
         }
 
-        public List<Event> GetEventsForAggregate(Guid aggregateId)
+        public List<Event> GetEventsForAggregate(string streamId, Guid aggregateId)
         {
             return _transaction.Connection.Query<DbEvent>(
                     @"SELECT id,uuid,version,eventdata
                     FROM Events
-                    WHERE uuid=@Uuid",
-                    param: new {Uuid = aggregateId},
+                    WHERE streamid=@StreamId AND uuid=@Uuid",
+                    param: new {StreamId = streamId, Uuid = aggregateId},
                     transaction: _transaction)
                 .Select(x => JsonConvert.DeserializeObject<Event>(x.EventData,
-                            new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Objects}))
+                    new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Objects}))
                 .ToList();
         }
     }

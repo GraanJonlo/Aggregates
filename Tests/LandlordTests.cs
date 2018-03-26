@@ -19,8 +19,7 @@ namespace Tests
                          {
                              new LandlordCreated(new Guid("00000000-0000-0000-0000-000000000000"),new Name("Bob", "Rocket"), "bob.rocket@email.com", address)
                          };
-            var sut = new Landlord();
-            sut.LoadFromHistory(events);
+            var sut = Landlord.Create(events);
 
             sut.ChangeName(new Name("Peter", "Crabkin"));
 

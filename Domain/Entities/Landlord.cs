@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Domain.Events;
 using Domain.Values;
 
@@ -10,10 +11,8 @@ namespace Domain.Entities
 
         public override Guid Id => _id;
 
-        public Landlord()
-        {
-            
-        }
+        private Landlord()
+        {}
 
         private Landlord(Guid id, Name name, string email, Address address)
         {
@@ -24,6 +23,13 @@ namespace Domain.Entities
         {
             // TODO Validate
             return new Landlord(id, name, email, address);
+        }
+
+        public static Landlord Create(List<Event> e)
+        {
+            var instance = new Landlord();
+            instance.LoadFromHistory(e);
+            return instance;
         }
 
         protected override void Apply(Event e)

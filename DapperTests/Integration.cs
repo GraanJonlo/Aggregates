@@ -1,4 +1,5 @@
 using System;
+using System.Data.SqlClient;
 using DapperDb;
 using Domain;
 using Domain.Entities;
@@ -12,22 +13,23 @@ namespace DapperTests
         //[Fact]
         public void CreateAndUpdate()
         {
+            var connectionString = "";
             var id = Guid.NewGuid();
             var address = new Address("Faux House", "Imaginary Street", "Scum on the Wold", "Widgetshire", "AB12 3CD");
 
-            using (IUnitOfWork uow = new UnitOfWork(""))
+            using (IUnitOfWork u = new UnitOfWork(new SqlConnection(connectionString)))
             {
                 var l = Landlord.Create(id, new Name("Bob", "Rocket"), "bob.rocket@email.com", address);
-                uow.LandlordRepository.Save(l, 0);
-                uow.Commit();
+                u.LandlordRepository.Save(l, 0);
+                u.Commit();
             }
 
-            using (IUnitOfWork uow = new UnitOfWork(""))
+            using (IUnitOfWork u = new UnitOfWork(new SqlConnection(connectionString)))
             {
-                var l = uow.LandlordRepository.GetById(id);
+                var l = u.LandlordRepository.GetById(id);
                 l.ChangeName(new Name("Peter", "Crabkin"));
-                uow.LandlordRepository.Save(l, 1);
-                uow.Commit();
+                u.LandlordRepository.Save(l, 1);
+                u.Commit();
             }
         }
     }

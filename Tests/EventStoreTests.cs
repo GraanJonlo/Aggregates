@@ -21,12 +21,12 @@ namespace Tests
                              new LandlordChangedName(new Guid("00000000-0000-0000-0000-000000000001"),new Name("Peter", "Crabkin"))
                          };
             IEventStore store = new EventStore();
-            store.SaveEvents(new Guid("00000000-0000-0000-0000-000000000001"),
+            store.SaveEvents("test", new Guid("00000000-0000-0000-0000-000000000001"),
                 events, 0);
 
-            var events2 = store.GetEventsForAggregate(new Guid("00000000-0000-0000-0000-000000000001"));
+            var events2 = store.GetEventsForAggregate("test", new Guid("00000000-0000-0000-0000-000000000001"));
 
-            Assert.Equal(2, events2.Count);
+            Assert.Equal(events.Count, events2.Count);
         }
     }
 }

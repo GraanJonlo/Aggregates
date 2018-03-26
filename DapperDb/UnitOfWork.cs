@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
 using Domain;
 using Domain.Entities;
 
@@ -13,9 +12,9 @@ namespace DapperDb
         private IRepository<Landlord> _landlordRepository;
         private bool _disposed;
 
-        public UnitOfWork(string connectionString)
+        public UnitOfWork(IDbConnection connection)
         {
-            _connection = new SqlConnection(connectionString);
+            _connection = connection;
             _connection.Open();
             _transaction = _connection.BeginTransaction();
         }
@@ -25,7 +24,7 @@ namespace DapperDb
             get
             {
                 return _landlordRepository ??
-                       (_landlordRepository = new Repository<Landlord>(new EventStore(_transaction)));
+                       (_landlordRepository = new LandlordRepository(new EventStore(_transaction)));
             }
         }
 
@@ -55,11 +54,11 @@ namespace DapperDb
 
         public void Dispose()
         {
-            dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        private void dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!_disposed)
             {
@@ -84,7 +83,7 @@ namespace DapperDb
 
         ~UnitOfWork()
         {
-            dispose(false);
+            Dispose(false);
         }
     }
 }

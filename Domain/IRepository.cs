@@ -4,7 +4,7 @@ namespace Domain
 {
     public interface IRepository<T> where T : Aggregate
     {
-        void Save(Aggregate aggregate, int expectedVersion);
+        void Save(T aggregate, int expectedVersion);
         T GetById(Guid id);
     }
 }
