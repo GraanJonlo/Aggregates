@@ -4,12 +4,11 @@ using System.Linq;
 using Domain;
 using Domain.Events;
 using Domain.Values;
-using InMemoryFakes;
 using Xunit;
 
 namespace Tests
 {
-    public class EventStoreTests
+    public class FakeEventStoreTests
     {
         [Fact]
         public void RetrieveEventsForAggregate()
@@ -35,7 +34,7 @@ namespace Tests
                 new LandlordChangedName(new Guid("00000000-0000-0000-0000-000000000002"), new Name("Peter", "Crabkin"))
             };
 
-            IEventStore store = new EventStore();
+            IEventStore store = new FakeEventStore(new DictionaryBackedEventPublisher());
             store.SaveEvents("test", new Guid("00000000-0000-0000-0000-000000000001"),e1, 0);
             store.SaveEvents("test", new Guid("00000000-0000-0000-0000-000000000002"),e2, 0);
             store.SaveEvents("test", new Guid("00000000-0000-0000-0000-000000000001"),e3, 0);
@@ -70,7 +69,7 @@ namespace Tests
                 new LandlordChangedName(new Guid("00000000-0000-0000-0000-000000000002"), new Name("Peter", "Crabkin"))
             };
 
-            IEventStore store = new EventStore();
+            IEventStore store = new FakeEventStore(new DictionaryBackedEventPublisher());
             store.SaveEvents("test", new Guid("00000000-0000-0000-0000-000000000001"),e1, 0);
             store.SaveEvents("test", new Guid("00000000-0000-0000-0000-000000000002"),e2, 0);
             store.SaveEvents("test", new Guid("00000000-0000-0000-0000-000000000001"),e3, 0);

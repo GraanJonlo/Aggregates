@@ -1,6 +1,6 @@
 ﻿namespace Domain.Events
 {
-    public class Event
+    public abstract class Event
     {
         public int Version { get; set; }
     }

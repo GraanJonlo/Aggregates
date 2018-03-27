@@ -10,12 +10,4 @@ namespace Domain
         IEnumerable<Event> GetEvents(string streamId, Guid aggregateId);
         IEnumerable<Event> GetEvents(string streamId, int skip, int take);
     }
-
-    public class AggregateNotFoundException : Exception
-    {
-    }
-
-    public class ConcurrencyException : Exception
-    {
-    }
 }

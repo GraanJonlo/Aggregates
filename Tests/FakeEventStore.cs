@@ -5,10 +5,12 @@ using Domain;
 using Domain.Events;
 using Newtonsoft.Json;
 
-namespace InMemoryFakes
+namespace Tests
 {
-    public class EventStore : IEventStore
+    public class FakeEventStore : IEventStore
     {
+        private readonly IEventPublisher _publisher;
+
         private readonly struct EventRecord
         {
             public readonly string StreamId;
@@ -23,6 +25,11 @@ namespace InMemoryFakes
                 Version = version;
                 EventData = eventData;
             }
+        }
+
+        public FakeEventStore(IEventPublisher publisher)
+        {
+            _publisher = publisher;
         }
 
         private readonly Dictionary<Guid, int> _versions = new Dictionary<Guid, int>();
@@ -60,7 +67,7 @@ namespace InMemoryFakes
                             @event,
                             new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Objects})));
 
-                //_publisher.Publish(@event);
+                _publisher.Publish(@event);
             }
         }
 

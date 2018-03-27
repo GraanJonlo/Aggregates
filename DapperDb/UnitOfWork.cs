@@ -7,13 +7,15 @@ namespace DapperDb
 {
     public class UnitOfWork : IUnitOfWork
     {
+        private readonly IEventPublisher _publisher;
         private IDbConnection _connection;
         private IDbTransaction _transaction;
         private IRepository<Landlord> _landlordRepository;
         private bool _disposed;
 
-        public UnitOfWork(IDbConnection connection)
+        public UnitOfWork(IEventPublisher publisher, IDbConnection connection)
         {
+            _publisher = publisher;
             _connection = connection;
             _connection.Open();
             _transaction = _connection.BeginTransaction();
@@ -24,7 +26,7 @@ namespace DapperDb
             get
             {
                 return _landlordRepository ??
-                       (_landlordRepository = new LandlordRepository(new EventStore(_transaction)));
+                       (_landlordRepository = new LandlordRepository(new SqlEventStore(_publisher, _transaction)));
             }
         }
 

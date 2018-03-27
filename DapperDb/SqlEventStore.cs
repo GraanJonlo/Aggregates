@@ -9,12 +9,14 @@ using Newtonsoft.Json;
 
 namespace DapperDb
 {
-    public class EventStore : IEventStore
+    public class SqlEventStore : IEventStore
     {
+        private readonly IEventPublisher _publisher;
         private readonly IDbTransaction _transaction;
 
-        public EventStore(IDbTransaction transaction)
+        public SqlEventStore(IEventPublisher publisher, IDbTransaction transaction)
         {
+            _publisher = publisher;
             _transaction = transaction;
         }
 
@@ -55,13 +57,13 @@ namespace DapperDb
                     },
                     transaction: _transaction);
 
-                //_publisher.Publish(@event);
+                _publisher.Publish(@event);
             }
         }
 
         public IEnumerable<Event> GetEvents(string streamId, Guid aggregateId)
         {
-            return _transaction.Connection.Query<DbEvent>(
+            var events = _transaction.Connection.Query<DbEvent>(
                     @"SELECT id,uuid,version,eventdata
                     FROM Events
                     WHERE streamid=@StreamId AND uuid=@Uuid
@@ -70,6 +72,13 @@ namespace DapperDb
                     transaction: _transaction)
                 .Select(x => JsonConvert.DeserializeObject<Event>(x.EventData,
                     new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Objects}));
+
+            if (!events.Any())
+            {
+                throw new AggregateNotFoundException();
+            }
+
+            return events;
         }
 
         public IEnumerable<Event> GetEvents(string streamId, int skip, int take)
