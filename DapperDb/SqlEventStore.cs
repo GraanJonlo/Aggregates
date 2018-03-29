@@ -14,10 +14,10 @@ namespace DapperDb
         private readonly IEventPublisher _publisher;
         private readonly IDbTransaction _transaction;
 
-        public SqlEventStore(IEventPublisher publisher, IDbTransaction transaction)
+        public SqlEventStore(IEventPublisher publisher, IUnitOfWork unitOfWork)
         {
             _publisher = publisher;
-            _transaction = transaction;
+            _transaction = unitOfWork.GetTransaction();
         }
 
         public void SaveEvents(string streamId, Guid aggregateId, IEnumerable<Event> events, int expectedVersion)

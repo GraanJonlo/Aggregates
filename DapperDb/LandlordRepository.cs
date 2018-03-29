@@ -18,7 +18,7 @@ namespace DapperDb
             _storage.SaveEvents("landlord", aggregate.Id, aggregate.GetUncommittedChanges(), expectedVersion);
         }
 
-        public Landlord GetById(Guid id)
+        public Landlord Get(Guid id)
         {
             var e = _storage.GetEvents("landlord", id);
             return Landlord.Create(e);

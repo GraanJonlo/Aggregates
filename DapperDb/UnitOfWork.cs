@@ -1,33 +1,25 @@
 ﻿using System;
 using System.Data;
 using Domain;
-using Domain.Entities;
 
 namespace DapperDb
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly IEventPublisher _publisher;
         private IDbConnection _connection;
         private IDbTransaction _transaction;
-        private IRepository<Landlord> _landlordRepository;
         private bool _disposed;
 
-        public UnitOfWork(IEventPublisher publisher, IDbConnection connection)
+        public UnitOfWork(IDbConnection connection)
         {
-            _publisher = publisher;
             _connection = connection;
             _connection.Open();
             _transaction = _connection.BeginTransaction();
         }
 
-        public IRepository<Landlord> LandlordRepository
+        public IDbTransaction GetTransaction()
         {
-            get
-            {
-                return _landlordRepository ??
-                       (_landlordRepository = new LandlordRepository(new SqlEventStore(_publisher, _transaction)));
-            }
+            return _transaction;
         }
 
         public void Commit()
@@ -45,13 +37,7 @@ namespace DapperDb
             {
                 _transaction.Dispose();
                 _transaction = _connection.BeginTransaction();
-                ResetRepositories();
             }
-        }
-
-        private void ResetRepositories()
-        {
-            _landlordRepository = null;
         }
 
         public void Dispose()

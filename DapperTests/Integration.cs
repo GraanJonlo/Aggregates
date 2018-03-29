@@ -13,22 +13,26 @@ namespace DapperTests
         //[Fact]
         public void CreateAndUpdate()
         {
-            var connectionString = "";
+            const string connectionString = "";
             var id = Guid.NewGuid();
             var address = new Address("Faux House", "Imaginary Street", "Scum on the Wold", "Widgetshire", "AB12 3CD");
 
-            using (IUnitOfWork u = new UnitOfWork(new DictionaryBackedEventPublisher(), new SqlConnection(connectionString)))
+            using (IUnitOfWork u = new UnitOfWork(new SqlConnection(connectionString)))
             {
+                var eventStore = new SqlEventStore(new DictionaryBackedEventPublisher(), u);
+                var landlordRepository = new LandlordRepository(eventStore);
                 var l = Landlord.Create(id, new Name("Bob", "Rocket"), "bob.rocket@email.com", address);
-                u.LandlordRepository.Save(l, 0);
+                landlordRepository.Save(l, 0);
                 u.Commit();
             }
 
-            using (IUnitOfWork u = new UnitOfWork(new DictionaryBackedEventPublisher(), new SqlConnection(connectionString)))
+            using (IUnitOfWork u = new UnitOfWork(new SqlConnection(connectionString)))
             {
-                var l = u.LandlordRepository.GetById(id);
+                var eventStore = new SqlEventStore(new DictionaryBackedEventPublisher(), u);
+                var landlordRepository = new LandlordRepository(eventStore);
+                var l = landlordRepository.Get(id);
                 l.ChangeName(new Name("Peter", "Crabkin"));
-                u.LandlordRepository.Save(l, 1);
+                landlordRepository.Save(l, 1);
                 u.Commit();
             }
         }

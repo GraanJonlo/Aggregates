@@ -1,12 +1,11 @@
 ﻿using System;
-using Domain.Entities;
+using System.Data;
 
 namespace Domain
 {
     public interface IUnitOfWork : IDisposable
     {
-        IRepository<Landlord> LandlordRepository { get; }
-
+        IDbTransaction GetTransaction();
         void Commit();
     }
 }
